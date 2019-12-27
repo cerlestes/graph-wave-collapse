@@ -10,7 +10,7 @@ type CollapseOrderFn func(*rand.Rand, NodeEnvironment) NodeID
 var RandomCollapseOrder CollapseOrderFn = func(rnd *rand.Rand, env NodeEnvironment) NodeID {
 FindRandomIndex:
 	for _, idx := range rnd.Perm(len(env.Nodes)) {
-		id := env.ToID(idx)
+		id := env.GetID(idx)
 		for cid, _ := range env.CollapsedMap {
 			if id == cid {
 				continue FindRandomIndex

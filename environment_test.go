@@ -34,13 +34,13 @@ func Test_Methods(t *testing.T) {
 		"6": 0,
 	}
 
-	assert.Equal(t, "0", ne.ToID(0))
-	assert.Equal(t, "3", ne.ToID(3))
-	assert.Equal(t, "", ne.ToID(7))
+	assert.Equal(t, "0", ne.GetID(0))
+	assert.Equal(t, "3", ne.GetID(3))
+	assert.Equal(t, "", ne.GetID(7))
 
-	assert.Equal(t, 0, ne.ToIndex("0"))
-	assert.Equal(t, 3, ne.ToIndex("3"))
-	assert.Equal(t, -1, ne.ToIndex("7"))
+	assert.Equal(t, 0, ne.GetIndex("0"))
+	assert.Equal(t, 3, ne.GetIndex("3"))
+	assert.Equal(t, -1, ne.GetIndex("7"))
 
 	assert.EqualValues(t, NodeStates{nil, nil, nil, nil, nil, nil, nil}, ne.States())
 

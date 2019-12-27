@@ -36,9 +36,8 @@ type NodeCollapsedMap = map[NodeID]int
 type NodeFilterFn = func(NodeID, NodeState) bool
 type NodeIDsOrNodeFilterFn = interface{}
 
-func (ne *NodeEnvironment) ToID(idx int) NodeID {
+func (ne *NodeEnvironment) GetID(idx int) NodeID {
 	if len(ne.Nodes) > idx {
-
 		if node := ne.Nodes[idx]; node != nil {
 			return node.ID()
 		}
@@ -46,7 +45,7 @@ func (ne *NodeEnvironment) ToID(idx int) NodeID {
 	return ""
 }
 
-func (ne *NodeEnvironment) ToIndex(id NodeID) int {
+func (ne *NodeEnvironment) GetIndex(id NodeID) int {
 	for idx, node := range ne.Nodes {
 		if id == node.ID() {
 			return idx
