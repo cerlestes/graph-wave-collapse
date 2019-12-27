@@ -26,7 +26,7 @@ func newAbcdNodeSuperposition() NodeSuperposition {
 
 func Test_RandomCollapseOrder(t *testing.T) {
 	super := newAbcdNodeSuperposition()
-	nodes := newDefaultTestNodes(super)
+	nodes := newDefaultTestNodes(super...)
 	rnd := rand.New(rand.NewSource(42))
 
 	sim := New(rnd, RandomCollapseOrder, nodes)
@@ -36,12 +36,12 @@ func Test_RandomCollapseOrder(t *testing.T) {
 	assert.EqualValues(t, NodeIDs{"0", "1", "6", "4", "3", "5", "2"}, collapsed.Collapsed())
 }
 
-func Test_NeighbourhoodCollapseOrder(t *testing.T) {
+func Test_RandomStreakCollapseOrder(t *testing.T) {
 	super := newAbcdNodeSuperposition()
-	nodes := newDefaultTestNodes(super)
+	nodes := newDefaultTestNodes(super...)
 	rnd := rand.New(rand.NewSource(420))
 
-	sim := New(rnd, NeighbourhoodCollapseOrder, nodes)
+	sim := New(rnd, RandomStreakCollapseOrder, nodes)
 	collapsed := sim.Collapse()
 
 	assert.EqualValues(t, NodeStates{"B", "A", "A", "A", "C", "A", "C"}, collapsed.States())
@@ -49,7 +49,7 @@ func Test_NeighbourhoodCollapseOrder(t *testing.T) {
 }
 
 func Test_AscendingCollapseOrder(t *testing.T) {
-	nodes := newDefaultTestNodes(NilSuperposition)
+	nodes := newDefaultTestNodes()
 	rnd := rand.New(rand.NewSource(1337))
 
 	sim := New(rnd, AscendingCollapseOrder, nodes)
@@ -59,7 +59,7 @@ func Test_AscendingCollapseOrder(t *testing.T) {
 }
 
 func Test_DescendingCollapseOrder(t *testing.T) {
-	nodes := newDefaultTestNodes(NilSuperposition)
+	nodes := newDefaultTestNodes()
 	rnd := rand.New(rand.NewSource(3141))
 
 	sim := New(rnd, DescendingCollapseOrder, nodes)
@@ -74,7 +74,7 @@ func Test_EmptyNodes(t *testing.T) {
 
 	orders := []CollapseOrderFn{
 		RandomCollapseOrder,
-		NeighbourhoodCollapseOrder,
+		RandomStreakCollapseOrder,
 		AscendingCollapseOrder,
 		DescendingCollapseOrder,
 	}
@@ -85,17 +85,17 @@ func Test_EmptyNodes(t *testing.T) {
 }
 
 func Test_LinearNodes(t *testing.T) {
-	nodes := newLinearNodes(NilSuperposition)
+	nodes := newLinearNodes()
 
 	orders := []CollapseOrderFn{
 		RandomCollapseOrder,
-		NeighbourhoodCollapseOrder,
+		RandomStreakCollapseOrder,
 		AscendingCollapseOrder,
 		DescendingCollapseOrder,
 	}
 	expected := []NodeIDs{
+		NodeIDs{"1", "3", "2", "0"},
 		NodeIDs{"1", "0", "3", "2"},
-		NodeIDs{"1", "2", "3", "0"},
 		NodeIDs{"0", "1", "2", "3"},
 		NodeIDs{"3", "2", "1", "0"},
 	}

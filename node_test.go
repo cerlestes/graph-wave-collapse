@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func newDefaultTestNodes(super NodeSuperposition) Nodes {
+func newDefaultTestNodes(super ...NodeSuperpositionFn) Nodes {
 	// The graph has the following form:
 	//     6
 	//     |
@@ -30,7 +30,7 @@ func newDefaultTestNodes(super NodeSuperposition) Nodes {
 	return nodes
 }
 
-func newLinearNodes(super NodeSuperposition) Nodes {
+func newLinearNodes(super ...NodeSuperpositionFn) Nodes {
 	// The graph has the following form:
 	// 0 - 1 - 2 - 3
 
@@ -52,26 +52,30 @@ func Test_Collapse(t *testing.T) {
 	rnd := rand.New(rand.NewSource(42))
 
 	// This superposition is empty and thus can only yield a nil state.
-	empty_super_ne := newDefaultTestNodesEnvironment(NodeSuperposition{})
+	empty_super_ne := newDefaultTestNodesEnvironment()
 	assert.Equal(t, nil, collapse(rnd, empty_super_ne))
 
 	// This superposition's only function always yields a nil state.
-	nil_super_ne := newDefaultTestNodesEnvironment(NilSuperposition)
+	nil_super_ne := newDefaultTestNodesEnvironment(
+		func(_ *rand.Rand, _ NodeEnvironment) (NodeProbability, NodeState) {
+			return 0, nil
+		},
+	)
 	assert.Equal(t, nil, collapse(rnd, nil_super_ne))
 
 	// This superposition only has a single non-probable state, resulting in it still collapsing into that state.
 	non_nil_state := "non_nil_state"
-	non_probable_super_ne := newDefaultTestNodesEnvironment(NodeSuperposition{
+	non_probable_super_ne := newDefaultTestNodesEnvironment(
 		func(_ *rand.Rand, _ NodeEnvironment) (NodeProbability, NodeState) {
 			return 0, non_nil_state
 		},
-	})
+	)
 	assert.Equal(t, non_nil_state, collapse(rnd, non_probable_super_ne))
 
 	// This superposition only has non-probable states, resulting in collapsing into a random state.
 	non_nil_state_2 := "non_nil_state_2"
 	non_nil_state_3 := "non_nil_state_3"
-	multi_non_probable_super_ne := newDefaultTestNodesEnvironment(NodeSuperposition{
+	multi_non_probable_super_ne := newDefaultTestNodesEnvironment(
 		func(_ *rand.Rand, _ NodeEnvironment) (NodeProbability, NodeState) {
 			return 0, non_nil_state
 		},
@@ -81,32 +85,35 @@ func Test_Collapse(t *testing.T) {
 		func(_ *rand.Rand, _ NodeEnvironment) (NodeProbability, NodeState) {
 			return 0, non_nil_state_3
 		},
-	})
+	)
 	assert.Equal(t, non_nil_state_2, collapse(rnd, multi_non_probable_super_ne))
 
-	// This superposition has two non-probable states, but one of them yields nil, resulting in collapsing into the nil state.
-	non_probable_nil_super_ne := newDefaultTestNodesEnvironment(NodeSuperposition{
+	// This superposition has many non-probable states and only one probable state.
+	non_probable_nil_super_ne := newDefaultTestNodesEnvironment(
 		func(_ *rand.Rand, _ NodeEnvironment) (NodeProbability, NodeState) {
-			return 0, non_nil_state
+			return 1, non_nil_state
 		},
 		func(_ *rand.Rand, _ NodeEnvironment) (NodeProbability, NodeState) {
 			return 0, nil
 		},
-	})
-	assert.Equal(t, nil, collapse(rnd, non_probable_nil_super_ne))
+		func(_ *rand.Rand, _ NodeEnvironment) (NodeProbability, NodeState) {
+			return 0, nil
+		},
+		func(_ *rand.Rand, _ NodeEnvironment) (NodeProbability, NodeState) {
+			return 0, nil
+		},
+	)
+	assert.Equal(t, non_nil_state, collapse(rnd, non_probable_nil_super_ne))
 }
 
 func Test_NewNodes(t *testing.T) {
-	non_nil_super := NodeSuperposition{
+	new_node := NewSuperpositionNode("A", NodeSuperposition{
 		func(_ *rand.Rand, _ NodeEnvironment) (NodeProbability, NodeState) {
-			return 0, "non-nil-value"
+			return 1, "non-nil-value"
 		},
-	}
-	new_node := NewSuperpositionNode("A", non_nil_super)
-	new_nil_node := NewSuperpositionNodeWithNil("B", non_nil_super)
+	})
 
 	assert.NotNil(t, new_node)
-	assert.NotNil(t, new_nil_node)
 }
 
 func Test_BaseNode(t *testing.T) {

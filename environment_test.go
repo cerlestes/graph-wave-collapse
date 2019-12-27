@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func newDefaultTestNodesEnvironment(super NodeSuperposition) *NodeEnvironment {
+func newDefaultTestNodesEnvironment(super ...NodeSuperpositionFn) *NodeEnvironment {
 	// The graph has the following form:
 	//     6
 	//     |
@@ -16,14 +16,14 @@ func newDefaultTestNodesEnvironment(super NodeSuperposition) *NodeEnvironment {
 	//     |
 	//     0
 
-	nodes := newDefaultTestNodes(super)
+	nodes := newDefaultTestNodes(super...)
 	ne := NewNodeEnvironment(nodes)
 
 	return ne
 }
 
 func Test_Methods(t *testing.T) {
-	ne := newDefaultTestNodesEnvironment(NilSuperposition)
+	ne := newDefaultTestNodesEnvironment()
 	ne.CollapsedMap = NodeCollapsedMap{
 		"0": 6,
 		"1": 5,
@@ -60,7 +60,7 @@ func Test_Methods(t *testing.T) {
 }
 
 func Test_IsNeighbour(t *testing.T) {
-	ne := newDefaultTestNodesEnvironment(NilSuperposition)
+	ne := newDefaultTestNodesEnvironment()
 	ne.Current = "5"
 
 	is_list := []bool{
@@ -83,7 +83,7 @@ func Test_IsNeighbour(t *testing.T) {
 }
 
 func Test_IsWithinRange(t *testing.T) {
-	ne := newDefaultTestNodesEnvironment(NilSuperposition)
+	ne := newDefaultTestNodesEnvironment()
 	ne.Current = "6"
 
 	is_list := []bool{
@@ -113,7 +113,7 @@ func Test_IsWithinRange(t *testing.T) {
 }
 
 func Test_NodesWithinRange(t *testing.T) {
-	ne := newDefaultTestNodesEnvironment(NilSuperposition)
+	ne := newDefaultTestNodesEnvironment()
 	ne.Current = "6"
 
 	// Check from current NodeID.
@@ -145,7 +145,7 @@ func Test_NodesWithinRange(t *testing.T) {
 }
 
 func Test_FilterNodes(t *testing.T) {
-	ne := newDefaultTestNodesEnvironment(NilSuperposition)
+	ne := newDefaultTestNodesEnvironment()
 
 	filtered_indexes_slice := ne.FilterNodes([]NodeID{"1", "2", "3"})
 	filtered_indexes := ne.FilterNodes(NodeIDs{"4", "5", "6"})

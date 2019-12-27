@@ -7,33 +7,27 @@ import (
 // CollapseOrderFn is a function that takes the current NodeEnvironment and returns the NodeID of the next Node to be collapsed.
 type CollapseOrderFn func(*rand.Rand, NodeEnvironment) NodeID
 
+// Collapses the Nodes in totally random order.
 var RandomCollapseOrder CollapseOrderFn = func(rnd *rand.Rand, env NodeEnvironment) NodeID {
-FindRandomIndex:
 	for _, idx := range rnd.Perm(len(env.Nodes)) {
 		id := env.GetID(idx)
-		for cid, _ := range env.CollapsedMap {
-			if id == cid {
-				continue FindRandomIndex
-			}
+		if _, collapsed := env.CollapsedMap[id]; collapsed == false {
+			return id
 		}
-		return id
 	}
 	return ""
 }
 
-var NeighbourhoodCollapseOrder CollapseOrderFn = func(rnd *rand.Rand, env NodeEnvironment) NodeID {
+// Collapses the Nodes by choosing a random Node and then continuining with a random neighbour of the latest Node until running out of neighbours.
+var RandomStreakCollapseOrder CollapseOrderFn = func(rnd *rand.Rand, env NodeEnvironment) NodeID {
 	// If this is not the first run, search for uncollapsed neighbours of the current node.
 	if env.Current != "" {
 		neighbours := env.NodesMap[env.Current].Neighbours()
-	FindRandomNeighbour:
 		for _, idx := range rnd.Perm(len(neighbours)) {
-			nid := neighbours[idx]
-			for cid, _ := range env.CollapsedMap {
-				if nid == cid {
-					continue FindRandomNeighbour
-				}
+			id := neighbours[idx]
+			if _, collapsed := env.CollapsedMap[id]; collapsed == false {
+				return id
 			}
-			return nid
 		}
 	}
 	// If this is the first run, or the current node has run out of neighbours, pick a new random node to continue with.
@@ -43,6 +37,7 @@ var NeighbourhoodCollapseOrder CollapseOrderFn = func(rnd *rand.Rand, env NodeEn
 	return ""
 }
 
+// Collapses the Nodes in ascending order.
 var AscendingCollapseOrder CollapseOrderFn = func(rnd *rand.Rand, env NodeEnvironment) NodeID {
 	if len(env.CollapsedMap) < len(env.Nodes) {
 		idx := len(env.CollapsedMap)
@@ -54,6 +49,7 @@ var AscendingCollapseOrder CollapseOrderFn = func(rnd *rand.Rand, env NodeEnviro
 	return ""
 }
 
+// Collapses the Nodes in descending order.
 var DescendingCollapseOrder CollapseOrderFn = func(rnd *rand.Rand, env NodeEnvironment) NodeID {
 	if len(env.CollapsedMap) < len(env.Nodes) {
 		idx := len(env.Nodes) - len(env.CollapsedMap) - 1
@@ -63,4 +59,14 @@ var DescendingCollapseOrder CollapseOrderFn = func(rnd *rand.Rand, env NodeEnvir
 		}
 	}
 	return ""
+}
+
+// Produces a CollapseOrderFn that collapses the Nodes in the provided order.
+func FixedCollapseOrder(order []NodeID) CollapseOrderFn {
+	return func(rnd *rand.Rand, env NodeEnvironment) NodeID {
+		if len(env.CollapsedMap) < len(env.Nodes) {
+			return order[len(env.CollapsedMap)]
+		}
+		return ""
+	}
 }
