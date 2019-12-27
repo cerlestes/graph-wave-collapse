@@ -4,7 +4,7 @@ import (
 	"math/rand"
 )
 
-func New(rnd *rand.Rand, mode CollapseModeFn, nodes Nodes) *GraphWaveCollapse {
+func New(rnd *rand.Rand, mode CollapseOrderFn, nodes Nodes) *GraphWaveCollapse {
 	return &GraphWaveCollapse{
 		rnd:   rnd,
 		mode:  mode,
@@ -14,7 +14,7 @@ func New(rnd *rand.Rand, mode CollapseModeFn, nodes Nodes) *GraphWaveCollapse {
 
 type GraphWaveCollapse struct {
 	rnd   *rand.Rand
-	mode  CollapseModeFn
+	mode  CollapseOrderFn
 	nodes Nodes
 }
 
